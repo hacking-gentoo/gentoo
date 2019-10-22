@@ -8,3 +8,4 @@ emerge --depclean
 revdep-rebuild
 eix-update
 rm /var/cache/distfiles/* -rf
+rm /usr/local/sbin/update-image.sh
