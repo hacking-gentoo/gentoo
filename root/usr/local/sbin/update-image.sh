@@ -2,6 +2,7 @@
 set -e
 
 emerge -uDN world
+etc-update --automode -5
 emerge app-portage/eix app-portage/flaggie app-portage/gentoolkit
 emerge --depclean
 revdep-rebuild
