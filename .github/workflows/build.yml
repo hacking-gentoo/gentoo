@@ -10,5 +10,16 @@ jobs:
  
     steps:
     - uses: actions/checkout@v1
-    - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag my-image-name:$(date +%s)
+    - uses: hacking-gentoo/action-fetch-stage3@master
+    - uses: hacking-gentoo/action-fetch-portage@master
+    - name: Login to docker.pkg.github.com
+      run: docker login docker.pkg.github.com -u "hacking-gentoo" -p "${{ secrets.GITHUB_TOKEN}}"
+    - name: Build the base Docker image
+      run: docker build --file Dockerfile --tag gentoo-base:latest .
+    - name: Update docker image
+      run: docker run --privileged gentoo-base:latest /usr/local/sbin/update-image.sh
+    - name: Tag docker image
+      run:  docker commit $(docker ps -l -q) docker.pkg.github.com/hacking-gentoo/gentoo/gentoo:$(date +"%Y%m%d")
+    - name: Push the Docker image
+      run: docker push docker.pkg.github.com/hacking-gentoo/gentoo/gentoo:$(date +"%Y%m%d")
+      
