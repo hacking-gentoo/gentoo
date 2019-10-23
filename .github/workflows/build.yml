@@ -10,7 +10,9 @@ jobs:
     - uses: hacking-gentoo/action-fetch-stage3@master
     - uses: hacking-gentoo/action-fetch-portage@master
     - name: Login to docker.pkg.github.com
-      run: docker login docker.pkg.github.com -u "hacking-gentoo" -p "${{ secrets.GITHUB_TOKEN}}"
+      run: docker login docker.pkg.github.com -u "hacking-gentoo" -p "${{ secrets.GITHUB_TOKEN }}"
+    - name: Login to docker.io
+      run: docker login -u "madhacking" -p "${{ secrets.DOCKER_HUB_TOKEN }}"
     - name: Build the base Gentoo docker image
       run: docker build --file Dockerfile.base --tag gentoo-base:latest .
     - name: Update Gentoo docker image
@@ -25,17 +27,30 @@ jobs:
         docker rm ${gentoo_image_id}
     - name: Fix the Gentoo docker image cmd
       run: docker run gentoo-base:temp /bin/bash
-    - name: Tag the Gentoo docker image
+    - name: Tag the Gentoo docker image (github)
       run: |
         gentoo_image_date="docker.pkg.github.com/hacking-gentoo/gentoo/gentoo:$(date +"%Y%m%d")"
         gentoo_image_latest="docker.pkg.github.com/hacking-gentoo/gentoo/gentoo:latest"
         gentoo_image_id="$(docker ps -l -q)"
         docker commit ${gentoo_image_id} ${gentoo_image_date}
         docker tag ${gentoo_image_date} ${gentoo_image_latest}
-    - name: Push the Gentoo docker image
+    - name: Push the Gentoo docker image (github)
       run: |
         gentoo_image_date="docker.pkg.github.com/hacking-gentoo/gentoo/gentoo:$(date +"%Y%m%d")"
         gentoo_image_latest="docker.pkg.github.com/hacking-gentoo/gentoo/gentoo:latest"
+        docker push ${gentoo_image_date}
+        docker push ${gentoo_image_latest}
+    - name: Tag the Gentoo docker image (docker.io)
+      run: |
+        gentoo_image_src="docker.pkg.github.com/hacking-gentoo/gentoo/gentoo:$(date +"%Y%m%d")"
+        gentoo_image_date="madhacking/gentoo:$(date +"%Y%m%d")"
+        gentoo_image_latest="madhacking/gentoo:latest"
+        docker tag ${gentoo_image_src} ${gentoo_image_date}
+        docker tag ${gentoo_image_src} ${gentoo_image_latest}
+    - name: Push the Gentoo docker image (docker.io)
+      run: |
+        gentoo_image_date="madhacking/gentoo:$(date +"%Y%m%d")"
+        gentoo_image_latest="madhacking/gentoo:latest"
         docker push ${gentoo_image_date}
         docker push ${gentoo_image_latest}
     - name: Clean up
@@ -56,17 +71,30 @@ jobs:
         docker rm ${gentoo_image_id}
     - name: Fix the Gentoo test-runner docker image cmd
       run: docker run gentoo-test-base:temp /bin/bash
-    - name: Tag the Gentoo test-runner docker image
+    - name: Tag the Gentoo test-runner docker image (github)
       run: |
         gentoo_image_date="docker.pkg.github.com/hacking-gentoo/gentoo/gentoo-testrunner:$(date +"%Y%m%d")"
         gentoo_image_latest="docker.pkg.github.com/hacking-gentoo/gentoo/gentoo-testrunner:latest"
         gentoo_image_id="$(docker ps -l -q)"
         docker commit ${gentoo_image_id} ${gentoo_image_date}
         docker tag ${gentoo_image_date} ${gentoo_image_latest}
-    - name: Push the Gentoo test-runner docker image
+    - name: Push the Gentoo test-runner docker image (github)
       run: |
         gentoo_image_date="docker.pkg.github.com/hacking-gentoo/gentoo/gentoo-testrunner:$(date +"%Y%m%d")"
         gentoo_image_latest="docker.pkg.github.com/hacking-gentoo/gentoo/gentoo-testrunner:latest"
+        docker push ${gentoo_image_date}
+        docker push ${gentoo_image_latest}
+    - name: Tag the Gentoo test-runner docker image (docker.io)
+      run: |
+        gentoo_image_src="docker.pkg.github.com/hacking-gentoo/gentoo/gentoo-testrunner:$(date +"%Y%m%d")"
+        gentoo_image_date="madhacking/gentoo-testrunner:$(date +"%Y%m%d")"
+        gentoo_image_latest="madhacking/gentoo-testrunner:latest"
+        docker tag ${gentoo_image_src} ${gentoo_image_date}
+        docker tag ${gentoo_image_src} ${gentoo_image_latest}
+    - name: Push the Gentoo test-runner docker image (docker.io)
+      run: |
+        gentoo_image_date="madhacking/gentoo-testrunner:$(date +"%Y%m%d")"
+        gentoo_image_latest="madhacking/gentoo-testrunner:latest"
         docker push ${gentoo_image_date}
         docker push ${gentoo_image_latest}
     - name: Clean up
