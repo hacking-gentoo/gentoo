@@ -20,7 +20,9 @@ jobs:
         gentoo_image_id="$(docker ps -l -q)"
         docker commit ${gentoo_image_id} gentoo-base:temp
     - name: Clean up
-      run: docker rm ${gentoo_image_id}
+      run: |
+        gentoo_image_id="$(docker ps -l -q)"
+        docker rm ${gentoo_image_id}
     - name: Fix Gentoo docker image cmd
       run: docker run gentoo-base:temp /bin/bash
     - name: Tag Gentoo docker image
@@ -32,10 +34,14 @@ jobs:
         docker tag ${gentoo_image_date} ${gentoo_image_latest}
     - name: Push the Gentoo docker image
       run: |
+        gentoo_image_date="docker.pkg.github.com/hacking-gentoo/gentoo/gentoo:$(date +"%Y%m%d")"
+        gentoo_image_latest="docker.pkg.github.com/hacking-gentoo/gentoo/gentoo:latest"
         docker push ${gentoo_image_date}
         docker push ${gentoo_image_latest}
     - name: Clean up
-      run: docker rm ${gentoo_image_id}
+      run: |
+        gentoo_image_id="$(docker ps -l -q)"
+        docker rm ${gentoo_image_id}
     - name: Build the Gentoo test runner docker image
       run: docker build --file Dockerfile.test --tag gentoo-test-base:latest .
     - name: Install test utils into Gentoo docker image
@@ -45,8 +51,10 @@ jobs:
         gentoo_image_id="$(docker ps -l -q)"
         docker commit ${gentoo_image_id} gentoo-test-base:temp
     - name: Clean up
-      run: docker rm ${gentoo_image_id}
-    - name: Fix Gentoo docker image cmd
+      run: |
+        gentoo_image_id="$(docker ps -l -q)"
+        docker rm ${gentoo_image_id}
+    - name: Fix Gentoo test runner docker image cmd
       run: docker run gentoo-test-base:temp /bin/bash
     - name: Tag Gentoo test runner docker image
       run: |
@@ -57,7 +65,11 @@ jobs:
         docker tag ${gentoo_image_date} ${gentoo_image_latest}
     - name: Push the Gentoo test runner docker image
       run: |
+        gentoo_image_date="docker.pkg.github.com/hacking-gentoo/gentoo/gentoo-test:$(date +"%Y%m%d")"
+        gentoo_image_latest="docker.pkg.github.com/hacking-gentoo/gentoo/gentoo-test:latest"
         docker push ${gentoo_image_date}
         docker push ${gentoo_image_latest}
     - name: Clean up
-      run: docker rm ${gentoo_image_id}
+      run: |
+        gentoo_image_id="$(docker ps -l -q)"
+        docker rm ${gentoo_image_id}
