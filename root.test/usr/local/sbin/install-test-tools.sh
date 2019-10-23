@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 set -e
 
+update_use 'dev-vcs/git' '-perl' '-python' '-webdav'
+
+emerge dev-vcs/git
+
 mkdir -p /etc/portage/repos.conf
 
 add_overlay hacking-gentoo https://github.com/MADhacking/hacking-gentoo.git
