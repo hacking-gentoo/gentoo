@@ -8,6 +8,6 @@ ADD portage /var/db/repos/gentoo/
 
 RUN echo -e "\nsource /etc/portage/make.extra" >> /etc/portage/make.conf
 
-COPY root /
+COPY root.base /
 
 CMD ["/bin/bash"]

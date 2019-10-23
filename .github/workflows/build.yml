@@ -1,4 +1,4 @@
-name: Build Gentoo Docker Image
+name: Build Gentoo Docker Images
 
 on: [push]
 
@@ -11,16 +11,53 @@ jobs:
     - uses: hacking-gentoo/action-fetch-portage@master
     - name: Login to docker.pkg.github.com
       run: docker login docker.pkg.github.com -u "hacking-gentoo" -p "${{ secrets.GITHUB_TOKEN}}"
-    - name: Build the base docker image
-      run: docker build --file Dockerfile --tag gentoo-base:latest .
-    - name: Update docker image
+    - name: Build the base Gentoo docker image
+      run: docker build --file Dockerfile.base --tag gentoo-base:latest .
+    - name: Update Gentoo docker image
       run: docker run --privileged gentoo-base:latest /usr/local/sbin/update-image.sh
-    - name: Tag docker image
+    - name: Tag Gentoo docker image (temporary)
       run: |
-        docker commit $(docker ps -l -q) docker.pkg.github.com/hacking-gentoo/gentoo/gentoo:$(date +"%Y%m%d")
-        docker tag docker.pkg.github.com/hacking-gentoo/gentoo/gentoo:$(date +"%Y%m%d") docker.pkg.github.com/hacking-gentoo/gentoo/gentoo:latest
-    - name: Push the Docker image
+        gentoo_image_id="$(docker ps -l -q)"
+        docker commit ${gentoo_image_id} gentoo-base:temp
+    - name: Clean up
+      run: docker rm ${gentoo_image_id}
+    - name: Fix Gentoo docker image cmd
+      run: docker run gentoo-base:temp /bin/bash
+    - name: Tag Gentoo docker image
       run: |
-        docker push docker.pkg.github.com/hacking-gentoo/gentoo/gentoo:$(date +"%Y%m%d")
-        docker push docker.pkg.github.com/hacking-gentoo/gentoo/gentoo:latest
-      
+        gentoo_image_date="docker.pkg.github.com/hacking-gentoo/gentoo/gentoo:$(date +"%Y%m%d")"
+        gentoo_image_latest="docker.pkg.github.com/hacking-gentoo/gentoo/gentoo:latest"
+        gentoo_image_id="$(docker ps -l -q)"
+        docker commit ${gentoo_image_id} ${gentoo_image_date}
+        docker tag ${gentoo_image_date} ${gentoo_image_latest}
+    - name: Push the Gentoo docker image
+      run: |
+        docker push ${gentoo_image_date}
+        docker push ${gentoo_image_latest}
+    - name: Clean up
+      run: docker rm ${gentoo_image_id}
+    - name: Build the Gentoo test runner docker image
+      run: docker build --file Dockerfile.test --tag gentoo-test-base:latest .
+    - name: Install test utils into Gentoo docker image
+      run: docker run --privileged gentoo-test-base:latest /usr/local/sbin/install-test-tools.sh
+    - name: Tag Gentoo docker image (temporary)
+      run: |
+        gentoo_image_id="$(docker ps -l -q)"
+        docker commit ${gentoo_image_id} gentoo-test-base:temp
+    - name: Clean up
+      run: docker rm ${gentoo_image_id}
+    - name: Fix Gentoo docker image cmd
+      run: docker run gentoo-test-base:temp /bin/bash
+    - name: Tag Gentoo test runner docker image
+      run: |
+        gentoo_image_date="docker.pkg.github.com/hacking-gentoo/gentoo/gentoo-test:$(date +"%Y%m%d")"
+        gentoo_image_latest="docker.pkg.github.com/hacking-gentoo/gentoo/gentoo-test:latest"
+        gentoo_image_id="$(docker ps -l -q)"
+        docker commit ${gentoo_image_id} ${gentoo_image_date}
+        docker tag ${gentoo_image_date} ${gentoo_image_latest}
+    - name: Push the Gentoo test runner docker image
+      run: |
+        docker push ${gentoo_image_date}
+        docker push ${gentoo_image_latest}
+    - name: Clean up
+      run: docker rm ${gentoo_image_id}
