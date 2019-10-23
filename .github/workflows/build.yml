@@ -58,15 +58,15 @@ jobs:
       run: docker run gentoo-test-base:temp /bin/bash
     - name: Tag Gentoo test runner docker image
       run: |
-        gentoo_image_date="docker.pkg.github.com/hacking-gentoo/gentoo/gentoo-test:$(date +"%Y%m%d")"
-        gentoo_image_latest="docker.pkg.github.com/hacking-gentoo/gentoo/gentoo-test:latest"
+        gentoo_image_date="docker.pkg.github.com/hacking-gentoo/gentoo/gentoo-testrunner:$(date +"%Y%m%d")"
+        gentoo_image_latest="docker.pkg.github.com/hacking-gentoo/gentoo/gentoo-testrunner:latest"
         gentoo_image_id="$(docker ps -l -q)"
         docker commit ${gentoo_image_id} ${gentoo_image_date}
         docker tag ${gentoo_image_date} ${gentoo_image_latest}
     - name: Push the Gentoo test runner docker image
       run: |
-        gentoo_image_date="docker.pkg.github.com/hacking-gentoo/gentoo/gentoo-test:$(date +"%Y%m%d")"
-        gentoo_image_latest="docker.pkg.github.com/hacking-gentoo/gentoo/gentoo-test:latest"
+        gentoo_image_date="docker.pkg.github.com/hacking-gentoo/gentoo/gentoo-testrunner:$(date +"%Y%m%d")"
+        gentoo_image_latest="docker.pkg.github.com/hacking-gentoo/gentoo/gentoo-testrunner:latest"
         docker push ${gentoo_image_date}
         docker push ${gentoo_image_latest}
     - name: Clean up
