@@ -1,6 +1,7 @@
 #!/usr/bin/env sh
 
 # Replace all matches for given sed regex with given replace_value.
+#
 # Exit codes:
 #   0 - success
 #   3 - no match for regex
