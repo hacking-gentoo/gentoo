@@ -4,3 +4,5 @@ A [Gentoo Linux](https://www.gentoo.org/) docker image automatically built from 
 release and portage tree.
 
 More information can be found in the [package registry](https://github.com/hacking-gentoo/gentoo/packages).
+
+Alternatively the docker images may be pulled from our [Docker Hub repository](https://cloud.docker.com/repository/docker/madhacking/gentoo) in the usual way.
