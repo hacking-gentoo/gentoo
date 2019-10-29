@@ -36,15 +36,15 @@ jobs:
         docker commit ${gentoo_image_id} ${gentoo_image_date}
         docker tag ${gentoo_image_date} ${gentoo_image_latest}
     - name: Login to docker.pkg.github.com
-      run: docker login docker.pkg.github.com -u "hacking-gentoo" -p "${{ secrets.GITHUB_TOKEN }}"
+      run: docker login docker.pkg.github.com -u "hacking-gentoo" -p "${{ secrets.GITHUB_TOKEN }}" || echo "::warning::Unable to login to github" 
     - name: Push the Gentoo docker image (github)
       run: |
         gentoo_image_date="docker.pkg.github.com/hacking-gentoo/gentoo/gentoo:$(date +"%Y%m%d")"
         gentoo_image_latest="docker.pkg.github.com/hacking-gentoo/gentoo/gentoo:latest"
-        docker push ${gentoo_image_date}
-        docker push ${gentoo_image_latest}
+        docker push ${gentoo_image_date} || echo "::warning::Unable to push to github"
+        docker push ${gentoo_image_latest} || echo "::warning::Unable to push to github"
     - name: Logout of docker.pkg.github.com
-      run: docker logout docker.pkg.github.com
+      run: docker logout docker.pkg.github.com || echo "::warning::Unable to logout of github" 
     - name: Tag the Gentoo docker image (docker.io)
       run: |
         gentoo_image_src="docker.pkg.github.com/hacking-gentoo/gentoo/gentoo:$(date +"%Y%m%d")"
@@ -88,15 +88,15 @@ jobs:
         docker commit ${gentoo_image_id} ${gentoo_image_date}
         docker tag ${gentoo_image_date} ${gentoo_image_latest}
     - name: Login to docker.pkg.github.com
-      run: docker login docker.pkg.github.com -u "hacking-gentoo" -p "${{ secrets.GITHUB_TOKEN }}"
+      run: docker login docker.pkg.github.com -u "hacking-gentoo" -p "${{ secrets.GITHUB_TOKEN }}" || echo "::warning::Unable to login to github" 
     - name: Push the Gentoo test-runner docker image (github)
       run: |
         gentoo_image_date="docker.pkg.github.com/hacking-gentoo/gentoo/gentoo-testrunner:$(date +"%Y%m%d")"
         gentoo_image_latest="docker.pkg.github.com/hacking-gentoo/gentoo/gentoo-testrunner:latest"
-        docker push ${gentoo_image_date}
-        docker push ${gentoo_image_latest}
+        docker push ${gentoo_image_date} || echo "::warning::Unable to push to github"
+        docker push ${gentoo_image_latest} || echo "::warning::Unable to push to github"
     - name: Logout of docker.pkg.github.com
-      run: docker logout docker.pkg.github.com
+      run: docker logout docker.pkg.github.com || echo "::warning::Unable to logout of github" 
     - name: Tag the Gentoo test-runner docker image (docker.io)
       run: |
         gentoo_image_src="docker.pkg.github.com/hacking-gentoo/gentoo/gentoo-testrunner:$(date +"%Y%m%d")"
