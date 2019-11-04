@@ -13,6 +13,7 @@ update_keywords 'dev-util/codecov-bash' '+~amd64'
 update_keywords 'dev-util/kcov' '+~amd64'
 
 emerge app-portage/repoman \
+       dev-perl/File-MimeInfo \
        dev-util/codecov-bash \
        dev-util/kcov \
        dev-util/shellcheck-bin
