@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 set -e
 
-flaggie --strict --destructive-cleanup ${@}
+flaggie --strict --destructive-cleanup "${@}"
