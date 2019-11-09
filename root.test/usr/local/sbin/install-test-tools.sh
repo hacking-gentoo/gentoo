@@ -17,7 +17,8 @@ emerge app-misc/jq \
        dev-perl/File-MimeInfo \
        dev-util/codecov-bash \
        dev-util/kcov \
-       dev-util/shellcheck-bin
+       dev-util/shellcheck-bin \
+       net-libs/libsmi
 
 rm /var/cache/distfiles/* -rf
 rm /usr/local/sbin/install-test-tools.sh
