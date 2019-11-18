@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
 set -e
 
+mkdir -p /etc/portage/package.accept_keywords
 echo "${@}" >> /etc/portage/package.accept_keywords/01-hacking
