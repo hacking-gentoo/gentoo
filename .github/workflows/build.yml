@@ -26,7 +26,7 @@ jobs:
     
     - name: Cache distfiles
       id: cache-distfiles
-      uses: actions/cache@v1
+      uses: gerbal/always-cache@v1.0.3
       with:
         path: ~/distfiles
         key: distfiles-${{ steps.prepare.outputs.datetime }}
@@ -35,7 +35,7 @@ jobs:
           distfiles
     - name: Cache binpkgs
       id: cache-binpkgs
-      uses: actions/cache@v1
+      uses: gerbal/always-cache@v1.0.3
       with:
         path: ~/binpkgs
         key: binpkgs-${{ steps.prepare.outputs.datetime }}
