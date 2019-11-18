@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
 set -e
 
+mkdir -p /etc/portage/package.use
 echo "${@}" >> /etc/portage/package.use/01-hacking
