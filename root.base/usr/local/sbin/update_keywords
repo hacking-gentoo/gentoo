@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 set -e
 
-update_use "${@}"
+echo "${@}" >> /etc/portage/package.accept_keywords/01-hacking

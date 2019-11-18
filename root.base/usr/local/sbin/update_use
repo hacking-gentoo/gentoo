@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 set -e
 
-flaggie --strict --destructive-cleanup "${@}"
+echo "${@}" >> /etc/portage/package.use/01-hacking
