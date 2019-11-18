@@ -1,0 +1,2 @@
+FEATURES="buildpkg"
+EMERGE_DEFAULT_OPTS="-k --binpkg-respect-use y"
