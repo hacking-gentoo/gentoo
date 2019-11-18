@@ -7,16 +7,12 @@ mkdir /etc/portage/make.conf
 mv ~/make.conf /etc/portage/make.conf/00-gentoo-defaults
 
 # Ensure package.use is a directory
-if [[ -f /etc/portage/package.use ]]; then
-	rm -rf /etc/portage/package.use
-	mkdir -p /etc/portage/package.use
-fi
+[[ -f /etc/portage/package.use ]] && rm -rf /etc/portage/package.use
+[[ -d /etc/portage/package.use ]] || mkdir -p /etc/portage/package.use
 
 # Ensure package.accept_keywords is a directory
-if [[ -f /etc/portage/package.accept_keywords ]]; then
-	rm -rf /etc/portage/package.accept_keywords
-	mkdir -p /etc/portage/package.accept_keywords
-fi
+[[ -f /etc/portage/package.accept_keywords ]] && rm -rf /etc/portage/package.accept_keywords
+[[ -d /etc/portage/package.accept_keywords ]] || mkdir -p /etc/portage/package.accept_keywords
 
 # Add our default settings
 mv /etc/portage/make.extra /etc/portage/make.conf/01-hacking-defaults
