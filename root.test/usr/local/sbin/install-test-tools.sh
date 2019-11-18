@@ -1,16 +1,20 @@
 #!/usr/bin/env bash
 set -e
 
-update_use 'dev-vcs/git' '-perl' '-python' '-webdav'
+# We want to build and consume binary packages if available
+cp /etc/portage/make.binpkg /etc/portage/make.conf/02-hacking-binpkg
 
+# Install git so we can install our overlay
+update_use 'dev-vcs/git' '-perl' '-python' '-webdav'
 emerge dev-vcs/git
 
+# Add our overlay
 mkdir -p /etc/portage/repos.conf
-
 add_overlay hacking-gentoo https://github.com/hacking-gentoo/overlay.git
 
-update_keywords 'dev-util/codecov-bash' '+~amd64'
-update_keywords 'dev-util/kcov' '+~amd64'
+# Install test tools
+update_keywords 'dev-util/codecov-bash'
+update_keywords 'dev-util/kcov'
 
 emerge app-misc/jq \
        app-portage/repoman \
@@ -20,5 +24,8 @@ emerge app-misc/jq \
        dev-util/shellcheck-bin \
        net-libs/libsmi
 
-rm /var/cache/distfiles/* -rf
+# Don't default to building or consuming binary packages
+rm /etc/portage/make.conf/02-hacking-binpkg
+
+# Remove this file
 rm /usr/local/sbin/install-test-tools.sh
