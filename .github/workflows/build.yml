@@ -11,19 +11,25 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+    # Prepare the ebuild environment
     - name: Prepare
       id: prepare
       run: |
-        echo "::set-env name=BUILD_DATE::$(date +"%Y%m%d")"
         echo "::set-output name=date::$(date +"%Y%m%d")"
         echo "::set-output name=datetime::$(date +"%Y%m%d%H%M")"
+        echo "::set-output name=suffix::"${GITHUB_REF##*/}"
+        [[ ${GITHUB_REF} = refs/heads/* ]] && echo "::set-output name=branch::${GITHUB_REF##*/}"
+        [[ ${GITHUB_REF} = refs/tags/* ]] && echo "::set-output name=tag::"${GITHUB_REF##*/}"
         mkdir ~/distfiles ~/binpkgs
-     
+    
+    # Check out the repository 
     - uses: actions/checkout@v1
 
+    # Fetch a stage 3 tarball and a copy of portage
     - uses: hacking-gentoo/action-fetch-stage3@master
     - uses: hacking-gentoo/action-fetch-portage@master
-    
+
+    # Cache distfiles and binary packages    
     - name: Cache distfiles
       id: cache-distfiles
       uses: gerbal/always-cache@v1.0.3
@@ -42,119 +48,149 @@ jobs:
         restore-keys: |
           binpkgs-${{ steps.prepare.outputs.datetime }}
           binpkgs
-        
+
+    # Build the base Gentoo image, run update-image.sh inside it and commit the result
     - name: Build the base Gentoo docker image
-      run: docker build --file Dockerfile.base --tag gentoo-base:latest .
+      run: docker build --file Dockerfile.base --tag gentoo:base .
     - name: Update Gentoo docker image
-      run: docker run --privileged -v ~/distfiles:/var/cache/distfiles -v ~/binpkgs:/var/cache/binpkgs gentoo-base:latest /usr/local/sbin/update-image.sh
-    - name: Tag the Gentoo docker image (temporary)
-      run: |
-        gentoo_image_id="$(docker ps -l -q)"
-        docker commit ${gentoo_image_id} gentoo-base:temp
-
+      run: docker run --privileged -v ~/distfiles:/var/cache/distfiles -v ~/binpkgs:/var/cache/binpkgs gentoo:base /usr/local/sbin/update-image.sh
+    - name: Commit the Gentoo docker image (temporary)
+      run: docker commit "$(docker ps -l -q)" gentoo:updated
+      
     - name: Clean up
-      run: |
-        gentoo_image_id="$(docker ps -l -q)"
-        docker rm ${gentoo_image_id}
+      run: docker rm "$(docker ps -l -q)"
 
+    # Commiting a run container changes the CMD so we need to fix it up
     - name: Fix the Gentoo docker image cmd
-      run: docker run gentoo-base:temp /bin/bash
+      run: docker run gentoo:updated /bin/bash
+    - name: Commit the Gentoo docker image
+      run: docker commit "$(docker ps -l -q)" gentoo:final
 
+    # If we are on the master branch then we want to tag and push the image to github
     - name: Tag the Gentoo docker image (github)
+      if: steps.prepare.outputs.branch == 'master'
       run: |
-        gentoo_image_date="docker.pkg.github.com/hacking-gentoo/gentoo/gentoo:${BUILD_DATE}"
+        gentoo_image_date="docker.pkg.github.com/hacking-gentoo/gentoo/gentoo:${{ steps.prepare.outputs.date }}"
         gentoo_image_latest="docker.pkg.github.com/hacking-gentoo/gentoo/gentoo:latest"
-        gentoo_image_id="$(docker ps -l -q)"
-        docker commit ${gentoo_image_id} ${gentoo_image_date}
-        docker tag ${gentoo_image_date} ${gentoo_image_latest}
+        docker tag gentoo:final ${gentoo_image_date}
+        docker tag gentoo:final ${gentoo_image_latest}
     - name: Login to docker.pkg.github.com
+      if: steps.prepare.outputs.branch == 'master'
       run: docker login docker.pkg.github.com -u "hacking-gentoo" -p "${{ secrets.GITHUB_TOKEN }}" || echo "::warning::Unable to login to github" 
-#     - name: Push the Gentoo docker image (github)
-#       run: |
-#         gentoo_image_date="docker.pkg.github.com/hacking-gentoo/gentoo/gentoo:${BUILD_DATE}"
-#         gentoo_image_latest="docker.pkg.github.com/hacking-gentoo/gentoo/gentoo:latest"
-#         docker push ${gentoo_image_date} || echo "::warning::Unable to push to github"
-#         docker push ${gentoo_image_latest} || echo "::warning::Unable to push to github"
+    - name: Push the Gentoo docker image (github)
+      if: steps.prepare.outputs.branch == 'master'
+      run: |
+        gentoo_image_date="docker.pkg.github.com/hacking-gentoo/gentoo/gentoo:${{ steps.prepare.outputs.date }}"
+        gentoo_image_latest="docker.pkg.github.com/hacking-gentoo/gentoo/gentoo:latest"
+        docker push ${gentoo_image_date} || echo "::warning::Unable to push to github"
+        docker push ${gentoo_image_latest} || echo "::warning::Unable to push to github"
     - name: Logout of docker.pkg.github.com
+      if: steps.prepare.outputs.branch == 'master'
       run: docker logout docker.pkg.github.com || echo "::warning::Unable to logout of github" 
 
+    # If we are on the master branch then we want to tag and push the image to docker.io in the usual way
+    # HOWEVER if we are on any other branch then we want to tag and push the image to docker.io using the branch name as the suffix
     - name: Tag the Gentoo docker image (docker.io)
+      if: steps.prepare.outputs.branch == 'master'
       run: |
-        gentoo_image_src="docker.pkg.github.com/hacking-gentoo/gentoo/gentoo:${BUILD_DATE}"
-        gentoo_image_date="madhacking/gentoo:${BUILD_DATE}"
+        gentoo_image_date="madhacking/gentoo:${{ steps.prepare.outputs.date }}"
         gentoo_image_latest="madhacking/gentoo:latest"
-        docker tag ${gentoo_image_src} ${gentoo_image_date}
-        docker tag ${gentoo_image_src} ${gentoo_image_latest}
+        docker tag gentoo:final ${gentoo_image_date}
+        docker tag gentoo:final ${gentoo_image_latest}
+    - name: Tag the Gentoo docker branch image (docker.io)
+      if: steps.prepare.outputs.branch != 'master'
+      run: |
+        gentoo_image_branch="madhacking/gentoo:${{ steps.prepare.outputs.suffix }}"
+        docker tag gentoo:final ${gentoo_image_branch}
     - name: Login to docker.io
       run: docker login -u "madhacking" -p "${{ secrets.DOCKER_HUB_TOKEN }}"
-#     - name: Push the Gentoo docker image (docker.io)
-#       run: |
-#         gentoo_image_date="madhacking/gentoo:${BUILD_DATE}"
-#         gentoo_image_latest="madhacking/gentoo:latest"
-#         docker push ${gentoo_image_date}
-#         docker push ${gentoo_image_latest}
+    - name: Push the Gentoo docker image (docker.io)
+      if: steps.prepare.outputs.branch == 'master'
+      run: |
+        gentoo_image_date="madhacking/gentoo:${{ steps.prepare.outputs.date }}"
+        gentoo_image_latest="madhacking/gentoo:latest"
+        docker push ${gentoo_image_date}
+        docker push ${gentoo_image_latest}
+    - name: Push the Gentoo docker branch image (docker.io)
+      if: steps.prepare.outputs.branch != 'master'
+      run: |
+        gentoo_image_branch="madhacking/gentoo:${{ steps.prepare.outputs.suffix }}"
+        docker push ${gentoo_image_branch}
     - name: Logout of docker.io
       run: docker logout
 
     - name: Clean up
-      run: |
-        gentoo_image_id="$(docker ps -l -q)"
-        docker rm ${gentoo_image_id}
+      run: docker rm "$(docker ps -l -q)"
 
+    # Build the base Gentoo test runner image, run install-test-tools.sh inside it and commit the result
     - name: Build the Gentoo test runner docker image
-      run: docker build --file Dockerfile.test --tag gentoo-test-base:latest .
+      run: docker build --file Dockerfile.test --tag gentoo-test:base .
     - name: Install test utils into the Gentoo docker image
-      run: docker run --privileged -v ~/distfiles:/var/cache/distfiles -v ~/binpkgs:/var/cache/binpkgs gentoo-test-base:latest /usr/local/sbin/install-test-tools.sh
-    - name: Tag the Gentoo test-runner docker image (temporary)
-      run: |
-        gentoo_image_id="$(docker ps -l -q)"
-        docker commit ${gentoo_image_id} gentoo-test-base:temp
+      run: docker run --privileged -v ~/distfiles:/var/cache/distfiles -v ~/binpkgs:/var/cache/binpkgs gentoo-test:base /usr/local/sbin/install-test-tools.sh
+    - name: Commit the Gentoo test-runner docker image (temporary)
+      run: docker commit "$(docker ps -l -q)" gentoo-test:updated
 
     - name: Clean up
-      run: |
-        gentoo_image_id="$(docker ps -l -q)"
-        docker rm ${gentoo_image_id}
+      run: docker rm "$(docker ps -l -q)"
 
+    # Commiting a run container changes the CMD so we need to fix it up
     - name: Fix the Gentoo test-runner docker image cmd
-      run: docker run gentoo-test-base:temp /bin/bash
+      run: docker run gentoo-test:updated /bin/bash
+    - name: Commit the Gentoo test-runner docker image
+      run: docker commit "$(docker ps -l -q)" gentoo-test:final
 
+    # If we are on the master branch then we want to tag and push the image to github
     - name: Tag the Gentoo test-runner docker image (github)
+      if: steps.prepare.outputs.branch != 'master'
       run: |
-        gentoo_image_date="docker.pkg.github.com/hacking-gentoo/gentoo/gentoo-testrunner:${BUILD_DATE}"
+        gentoo_image_date="docker.pkg.github.com/hacking-gentoo/gentoo/gentoo-testrunner:${{ steps.prepare.outputs.date }}"
         gentoo_image_latest="docker.pkg.github.com/hacking-gentoo/gentoo/gentoo-testrunner:latest"
-        gentoo_image_id="$(docker ps -l -q)"
-        docker commit ${gentoo_image_id} ${gentoo_image_date}
-        docker tag ${gentoo_image_date} ${gentoo_image_latest}
+        docker tag gentoo-test:final ${gentoo_image_date}
+        docker tag gentoo-test:final ${gentoo_image_latest}
     - name: Login to docker.pkg.github.com
+      if: steps.prepare.outputs.branch != 'master'
       run: docker login docker.pkg.github.com -u "hacking-gentoo" -p "${{ secrets.GITHUB_TOKEN }}" || echo "::warning::Unable to login to github" 
-#     - name: Push the Gentoo test-runner docker image (github)
-#       run: |
-#         gentoo_image_date="docker.pkg.github.com/hacking-gentoo/gentoo/gentoo-testrunner:${BUILD_DATE}"
-#         gentoo_image_latest="docker.pkg.github.com/hacking-gentoo/gentoo/gentoo-testrunner:latest"
-#         docker push ${gentoo_image_date} || echo "::warning::Unable to push to github"
-#         docker push ${gentoo_image_latest} || echo "::warning::Unable to push to github"
+    - name: Push the Gentoo test-runner docker image (github)
+      if: steps.prepare.outputs.branch != 'master'
+      run: |
+        gentoo_image_date="docker.pkg.github.com/hacking-gentoo/gentoo/gentoo-testrunner:${{ steps.prepare.outputs.date }}"
+        gentoo_image_latest="docker.pkg.github.com/hacking-gentoo/gentoo/gentoo-testrunner:latest"
+        docker push ${gentoo_image_date} || echo "::warning::Unable to push to github"
+        docker push ${gentoo_image_latest} || echo "::warning::Unable to push to github"
     - name: Logout of docker.pkg.github.com
+      if: steps.prepare.outputs.branch != 'master'
       run: docker logout docker.pkg.github.com || echo "::warning::Unable to logout of github" 
 
+    # If we are on the master branch then we want to tag and push the image to docker.io in the usual way
+    # HOWEVER if we are on any other branch then we want to tag and push the image to docker.io using the branch name as the suffix
     - name: Tag the Gentoo test-runner docker image (docker.io)
+      if: steps.prepare.outputs.branch == 'master'
       run: |
-        gentoo_image_src="docker.pkg.github.com/hacking-gentoo/gentoo/gentoo-testrunner:${BUILD_DATE}"
-        gentoo_image_date="madhacking/gentoo-testrunner:${BUILD_DATE}"
+        gentoo_image_date="madhacking/gentoo-testrunner:${{ steps.prepare.outputs.date }}"
         gentoo_image_latest="madhacking/gentoo-testrunner:latest"
-        docker tag ${gentoo_image_src} ${gentoo_image_date}
-        docker tag ${gentoo_image_src} ${gentoo_image_latest}
+        docker tag gentoo-test:final ${gentoo_image_date}
+        docker tag gentoo-test:final ${gentoo_image_latest}
+    - name: Tag the Gentoo test-runner docker branch image (docker.io)
+      if: steps.prepare.outputs.branch != 'master'
+      run: |
+        gentoo_image_branch="madhacking/gentoo-testrunner:${{ steps.prepare.outputs.suffix }}"
+        docker tag gentoo-test:final ${gentoo_image_branch}
     - name: Login to docker.io
       run: docker login -u "madhacking" -p "${{ secrets.DOCKER_HUB_TOKEN }}"
-#     - name: Push the Gentoo test-runner docker image (docker.io)
-#       run: |
-#         gentoo_image_date="madhacking/gentoo-testrunner:${BUILD_DATE}"
-#         gentoo_image_latest="madhacking/gentoo-testrunner:latest"
-#         docker push ${gentoo_image_date}
-#         docker push ${gentoo_image_latest}
+    - name: Push the Gentoo test-runner docker image (docker.io)
+      if: steps.prepare.outputs.branch == 'master'
+      run: |
+        gentoo_image_date="madhacking/gentoo-testrunner:${{ steps.prepare.outputs.date }}"
+        gentoo_image_latest="madhacking/gentoo-testrunner:latest"
+        docker push ${gentoo_image_date}
+        docker push ${gentoo_image_latest}
+    - name: Push the Gentoo test-runner docker branch image (docker.io)
+      if: steps.prepare.outputs.branch != 'master'
+      run: |
+        gentoo_image_branch="madhacking/gentoo-testrunner:${{ steps.prepare.outputs.suffix }}"
+        docker push ${gentoo_image_branch}
     - name: Logout of docker.io
       run: docker logout
 
     - name: Clean up
-      run: |
-        gentoo_image_id="$(docker ps -l -q)"
-        docker rm ${gentoo_image_id}
+      run: docker rm "$(docker ps -l -q)"
