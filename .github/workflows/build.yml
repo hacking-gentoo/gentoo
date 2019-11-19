@@ -141,24 +141,24 @@ jobs:
 
     # If we are on the master branch then we want to tag and push the image to github
     - name: Tag the Gentoo test-runner docker image (github)
-      if: steps.prepare.outputs.branch != 'master'
+      if: steps.prepare.outputs.branch == 'master'
       run: |
         gentoo_image_date="docker.pkg.github.com/hacking-gentoo/gentoo/gentoo-testrunner:${{ steps.prepare.outputs.date }}"
         gentoo_image_latest="docker.pkg.github.com/hacking-gentoo/gentoo/gentoo-testrunner:latest"
         docker tag gentoo-test:final ${gentoo_image_date}
         docker tag gentoo-test:final ${gentoo_image_latest}
     - name: Login to docker.pkg.github.com
-      if: steps.prepare.outputs.branch != 'master'
+      if: steps.prepare.outputs.branch == 'master'
       run: docker login docker.pkg.github.com -u "hacking-gentoo" -p "${{ secrets.GITHUB_TOKEN }}" || echo "::warning::Unable to login to github" 
     - name: Push the Gentoo test-runner docker image (github)
-      if: steps.prepare.outputs.branch != 'master'
+      if: steps.prepare.outputs.branch == 'master'
       run: |
         gentoo_image_date="docker.pkg.github.com/hacking-gentoo/gentoo/gentoo-testrunner:${{ steps.prepare.outputs.date }}"
         gentoo_image_latest="docker.pkg.github.com/hacking-gentoo/gentoo/gentoo-testrunner:latest"
         docker push ${gentoo_image_date} || echo "::warning::Unable to push to github"
         docker push ${gentoo_image_latest} || echo "::warning::Unable to push to github"
     - name: Logout of docker.pkg.github.com
-      if: steps.prepare.outputs.branch != 'master'
+      if: steps.prepare.outputs.branch == 'master'
       run: docker logout docker.pkg.github.com || echo "::warning::Unable to logout of github" 
 
     # If we are on the master branch then we want to tag and push the image to docker.io in the usual way
