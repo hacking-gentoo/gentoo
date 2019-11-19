@@ -17,9 +17,9 @@ jobs:
       run: |
         echo "::set-output name=date::$(date +"%Y%m%d")"
         echo "::set-output name=datetime::$(date +"%Y%m%d%H%M")"
-        echo "::set-output name=suffix::"${GITHUB_REF##*/}"
+        echo "::set-output name=suffix::${GITHUB_REF##*/}"
         [[ ${GITHUB_REF} = refs/heads/* ]] && echo "::set-output name=branch::${GITHUB_REF##*/}"
-        [[ ${GITHUB_REF} = refs/tags/* ]] && echo "::set-output name=tag::"${GITHUB_REF##*/}"
+        [[ ${GITHUB_REF} = refs/tags/* ]] && echo "::set-output name=tag::${GITHUB_REF##*/}"
         mkdir ~/distfiles ~/binpkgs
     
     # Check out the repository 
