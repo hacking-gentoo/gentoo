@@ -20,6 +20,9 @@ mv /etc/portage/make.extra /etc/portage/make.conf/01-hacking-defaults
 # We want to build and consume binary packages if available
 cp /etc/portage/make.binpkg /etc/portage/make.conf/02-hacking-binpkg
 
+# app-portage/portage-utils-0.80 is bugged
+update_masks '=app-portage/portage-utils-0.80'
+
 # Perform the update
 emerge -uDN world
 etc-update --automode -5
