@@ -52,6 +52,8 @@ jobs:
     # Build the base Gentoo image, run update-image.sh inside it and commit the result
     - name: Build the base Gentoo docker image
       run: docker build --file Dockerfile.base --tag gentoo:base .
+    - name: Remove stage 3 archive and portage snapshot
+      run: rm -rf stage* portage
     - name: Update Gentoo docker image
       run: docker run --privileged -v ~/distfiles:/var/cache/distfiles -v ~/binpkgs:/var/cache/binpkgs gentoo:base /usr/local/sbin/update-image.sh
     - name: Commit the Gentoo docker image (temporary)
