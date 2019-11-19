@@ -24,6 +24,9 @@ emerge app-misc/jq \
        dev-util/shellcheck-bin \
        net-libs/libsmi
 
+# Clean any unused binary packages to stop the cache getting polluted.
+qpkg --clean --nocolor
+
 # Don't default to building or consuming binary packages
 rm /etc/portage/make.conf/02-hacking-binpkg
 
