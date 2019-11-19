@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+set -e
+
+mkdir -p /etc/portage/package.mask
+echo "${@}" >> /etc/portage/package.mask/01-hacking
