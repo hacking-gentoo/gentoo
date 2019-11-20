@@ -35,12 +35,14 @@ if [[ -d "${GITHUB_WORKSPACE}/binpkgs" ]]; then
 	rm -rf /var/cache/binpkgs
 	ln -s "${GITHUB_WORKSPACE}/binpkgs" /var/cache/binpkgs
 	cp /etc/portage/make.binpkg /etc/portage/make.conf/02-hacking-binpkg
+	echo "Enabled binary package cache"
 fi
 
 # If we are using a distfiles cache
 if [[ -d "${GITHUB_WORKSPACE}/distfiles" ]]; then
 	rm -rf /var/cache/distfiles
 	ln -s "${GITHUB_WORKSPACE}/distfiles" /var/cache/distfiles
+	echo "Enabled distfiles cache"
 fi
 
 # Execute the entry point
