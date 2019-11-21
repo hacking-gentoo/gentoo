@@ -42,6 +42,9 @@ fi
 if [[ -d "${GITHUB_WORKSPACE}/distfiles" ]]; then
 	rm -rf /var/cache/distfiles
 	ln -s "${GITHUB_WORKSPACE}/distfiles" /var/cache/distfiles
+	chown -R root:portage "${GITHUB_WORKSPACE}/distfiles"
+	chmod -R 2775 "${GITHUB_WORKSPACE}/distfiles"
+	rm -rf "${GITHUB_WORKSPACE}/distfiles/git3-src"
 	echo "Enabled distfiles cache"
 fi
 
