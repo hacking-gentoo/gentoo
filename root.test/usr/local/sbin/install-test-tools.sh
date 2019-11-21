@@ -31,5 +31,8 @@ eclean-dist --deep
 # Don't default to building or consuming binary packages
 rm /etc/portage/make.conf/02-hacking-binpkg
 
+# Create a testrunner user
+useradd -m -G users,portage,wheel -s /bin/bash testrunner
+
 # Remove this file
 rm /usr/local/sbin/install-test-tools.sh
