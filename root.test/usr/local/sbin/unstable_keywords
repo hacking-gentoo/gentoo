@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+set -e
+
+function die()
+{
+    echo "::error::$1"
+    exit 1
+}
+
+function make_unstable()
+{
+	if [[ ${1} == ~* ]]; then
+		echo "${1}"
+	else
+		echo "~${1}"
+	fi
+}
+
+ebuild_file_new="${1}"
+[[ -r "${ebuild_file_new}" ]] || die "Unable to read ${ebuild_file_new}"
+# shellcheck disable=SC1090
+source "${ebuild_file_new}"
+
+new_keywords=""
+for k in $KEYWORDS; do
+	if (( ${#new_keywords} > 0 )); then
+		new_keywords+=" "
+	fi
+	new_keywords+="$(make_unstable "${k}")"
+done
+
+echo "${new_keywords}"
