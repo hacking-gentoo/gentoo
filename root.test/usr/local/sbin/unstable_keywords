@@ -16,6 +16,12 @@ function make_unstable()
 	fi
 }
 
+# Dummy function so ebuilds can be sourced.
+function inherit()
+{
+	:
+}
+
 ebuild_file_new="${1}"
 [[ -r "${ebuild_file_new}" ]] || die "Unable to read ${ebuild_file_new}"
 # shellcheck disable=SC1090
