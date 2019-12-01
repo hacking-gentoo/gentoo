@@ -30,6 +30,10 @@ emerge app-misc/jq \
 eclean-pkg --deep
 eclean-dist --deep
 
+# Seed repoman layout cache and metadata.xsd
+cd /var/db/repos/test-repo
+repoman || true
+
 # Don't default to building or consuming binary packages
 rm /etc/portage/make.conf/02-hacking-binpkg
 
