@@ -32,6 +32,8 @@ Installed packages:
 
 ```
 app-misc/jq
+app-portage/gentoolbox
+app-portage/gentoolkit
 app-portage/repoman
 dev-perl/File-MimeInfo
 dev-util/codecov-bash
