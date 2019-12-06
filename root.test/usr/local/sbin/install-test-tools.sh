@@ -24,6 +24,7 @@ emerge app-misc/jq \
        dev-util/codecov-bash \
        dev-util/kcov \
        dev-util/shellcheck-bin \
+       dev-vcs/hub-bin \
        net-libs/libsmi
 
 # Clean any unused binary packages and distfiles to stop the caches getting polluted.
