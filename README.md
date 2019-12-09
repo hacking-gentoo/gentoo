@@ -39,6 +39,7 @@ dev-perl/File-MimeInfo
 dev-util/codecov-bash
 dev-util/kcov
 dev-util/shellcheck-bin
+dev-vcs/hub-bin
 net-libs/libsmi
 ```
 
