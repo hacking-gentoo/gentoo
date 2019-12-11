@@ -53,4 +53,4 @@ if [[ -d "${GITHUB_WORKSPACE}/distfiles" ]]; then
 fi
 
 # Execute the entry point
-exec /entrypoint.sh
+/entrypoint.sh
