@@ -10,10 +10,10 @@ A Gentoo Linux docker image with minimal reconfiguration from the standard distr
 Modified settings:
  
 ```
-FEATURES="-ipc-sandbox -network-sandbox -pid-sandbox"
+FEATURES="-ipc-sandbox -network-sandbox -pid-sandbox -sandbox -usersandbox"
 MAKEOPTS="-j3"
 USE="bindist caps"
-EMERGE_DEFAULT_OPTS="--quiet-build y"
+EMERGE_DEFAULT_OPTS="--quiet-build y --verbose-conflicts"
 ```
 
 More information can be found in the [package registry](https://github.com/hacking-gentoo/gentoo/packages).
