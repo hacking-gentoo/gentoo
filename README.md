@@ -36,6 +36,7 @@ app-portage/gentoolbox
 app-portage/gentoolkit
 app-portage/repoman
 dev-perl/File-MimeInfo
+dev-libs/github-action-lib
 dev-util/codecov-bash
 dev-util/kcov
 dev-util/shellcheck-bin
