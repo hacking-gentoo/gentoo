@@ -14,6 +14,7 @@ add_overlay hacking-gentoo https://github.com/hacking-gentoo/overlay.git
 
 # Install test tools
 update_keywords 'app-portage/gentoolbox'
+update_keywords 'dev-libs/github-action-lib'
 update_keywords 'dev-util/codecov-bash'
 update_keywords 'dev-util/kcov'
 
@@ -21,6 +22,7 @@ emerge app-misc/jq \
        app-portage/gentoolbox \
        app-portage/repoman \
        dev-perl/File-MimeInfo \
+       dev-libs/github-action-lib \
        dev-util/codecov-bash \
        dev-util/kcov \
        dev-util/shellcheck-bin \
