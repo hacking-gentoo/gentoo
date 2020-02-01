@@ -52,5 +52,8 @@ if [[ -d "${GITHUB_WORKSPACE}/distfiles" ]]; then
 	echo "Enabled distfiles cache"
 fi
 
+# Export so environment can be detected
+export HACKING_GENTOO_TESTRUNNER="true"
+
 # Execute the entry point
 /entrypoint.sh
