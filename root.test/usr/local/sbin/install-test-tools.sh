@@ -8,9 +8,17 @@ cp /etc/portage/make.binpkg /etc/portage/make.conf/02-hacking-binpkg
 update_use 'dev-vcs/git' '-perl' '-python' '-webdav'
 emerge dev-vcs/git
 
-# Add our overlay
+# Add the hacking-gentoo overlay
 mkdir -p /etc/portage/repos.conf
 add_overlay hacking-gentoo https://github.com/hacking-gentoo/overlay.git
+
+# Rename the hacking-gentoo overlay so that we can still auto deploy to it without name clashes
+mv /etc/portage/repos.conf/hacking-gentoo.conf /etc/portage/repos.conf/hacking-gentoo-testrunner.conf
+mv /var/db/repos/hacking-gentoo /var/db/repos/hacking-gentoo-testrunner
+sed-or-die "hacking-gentoo" "hacking-gentoo-testrunner" /var/db/repos/hacking-gentoo-testrunner/profiles/repo_name
+sed-or-die "hacking-gentoo" "hacking-gentoo-testrunner" /etc/portage/repos.conf/hacking-gentoo-testrunner.conf
+sed-or-die "sync-type.*" "" /etc/portage/repos.conf/hacking-gentoo-testrunner.conf
+sed-or-die "sync-uri.*" "" /etc/portage/repos.conf/hacking-gentoo-testrunner.conf
 
 # Install test tools
 update_keywords 'app-portage/gentoolbox'
