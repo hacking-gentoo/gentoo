@@ -20,22 +20,32 @@ sed-or-die "hacking-gentoo" "hacking-gentoo-testrunner" /etc/portage/repos.conf/
 sed-or-die "sync-type.*" "" /etc/portage/repos.conf/hacking-gentoo-testrunner.conf
 sed-or-die "sync-uri.*" "" /etc/portage/repos.conf/hacking-gentoo-testrunner.conf
 
-# Install test tools
+# Unmask test tools
 update_keywords 'app-portage/gentoolbox'
 update_keywords 'dev-libs/github-action-lib'
 update_keywords 'dev-util/codecov-bash'
 update_keywords 'dev-util/kcov'
 
-emerge app-misc/jq \
-       app-portage/gentoolbox \
-       app-portage/repoman \
-       dev-perl/File-MimeInfo \
-       dev-libs/github-action-lib \
-       dev-util/codecov-bash \
-       dev-util/kcov \
-       dev-util/shellcheck-bin \
-       dev-vcs/hub-bin \
-       net-libs/libsmi
+# Array of packages to install
+test_tools=(
+	app-misc/jq
+	app-portage/gentoolbox
+	app-portage/repoman
+	dev-perl/File-MimeInfo
+	dev-libs/github-action-lib
+	dev-util/codecov-bash
+	dev-util/kcov
+	dev-util/shellcheck-bin
+	dev-vcs/hub-bin
+	net-libs/libsmi
+)
+
+# Make necessary use / mask changes.
+emerge --autounmask y --autounmask-write y --autounmask-only y "${test_tools[@]}"
+etc-update --automode -5
+
+# Install test tools
+emerge "${test_tools[@]}"
 
 # Clean any unused binary packages and distfiles to stop the caches getting polluted.
 eclean-pkg --deep
