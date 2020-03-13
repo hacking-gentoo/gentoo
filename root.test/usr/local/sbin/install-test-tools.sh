@@ -28,6 +28,7 @@ update_keywords 'dev-util/kcov'
 
 # Array of packages to install
 test_tools=(
+	acct-group/docker
 	app-misc/jq
 	app-portage/gentoolbox
 	app-portage/repoman
@@ -59,7 +60,10 @@ repoman || true
 rm /etc/portage/make.conf/02-hacking-binpkg
 
 # Create a testrunner user
-useradd -m -G users,portage,wheel -s /bin/bash testrunner
+useradd -m -G users,portage,wheel,docker -s /bin/bash testrunner
+
+# Add portage user to required groups
+ usermod --append --groups docker portage
 
 # Remove this file
 rm /usr/local/sbin/install-test-tools.sh
