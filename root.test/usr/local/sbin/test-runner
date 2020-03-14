@@ -52,6 +52,9 @@ if [[ -d "${GITHUB_WORKSPACE}/distfiles" ]]; then
 	echo "Enabled distfiles cache"
 fi
 
+# Modify the docker socket so that it is correctly owned by the docker group.
+chown root:docker /var/run/docker.sock || die "Unable to correct group for /var/run/docker.sock"
+
 # Export so environment can be detected
 export HACKING_GENTOO_TESTRUNNER="true"
 
